@@ -44,6 +44,8 @@ public class Accommodation {
     private BigDecimal dailyRate;
     @Column(nullable = false)
     private Integer availability;
+    @Column(nullable = false)
+    private boolean isDeleted = false;
 
     public enum Type {
         HOUSE,
