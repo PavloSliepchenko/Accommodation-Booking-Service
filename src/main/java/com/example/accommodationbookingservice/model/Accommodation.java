@@ -16,6 +16,8 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -31,8 +33,10 @@ public class Accommodation {
     @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     @Enumerated(EnumType.STRING)
     private Type type;
-    @OneToOne(fetch = FetchType.EAGER)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @JoinColumn(name = "address_id")
+    @OneToOne(fetch = FetchType.EAGER)
     private Address location;
     @Column(nullable = false)
     private String size;
