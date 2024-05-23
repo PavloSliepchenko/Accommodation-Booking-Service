@@ -35,7 +35,7 @@ public class Accommodation {
     private Type type;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JoinColumn(name = "address_id")
+    @JoinColumn(name = "address_id", nullable = false)
     @OneToOne(fetch = FetchType.EAGER)
     private Address location;
     @Column(nullable = false)
