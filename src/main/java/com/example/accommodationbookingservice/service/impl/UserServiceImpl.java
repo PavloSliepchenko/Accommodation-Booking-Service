@@ -71,6 +71,11 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(userRepository.save(user));
     }
 
+    @Override
+    public void delete(Long userId) {
+        userRepository.delete(getUserById(userId));
+    }
+
     private User getUserById(Long userId) {
         return userRepository.findById(userId).orElseThrow(
                 () -> new EntityNotFoundException("There is no user with id " + userId)

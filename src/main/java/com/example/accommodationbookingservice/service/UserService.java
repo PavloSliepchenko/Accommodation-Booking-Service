@@ -14,4 +14,6 @@ public interface UserService {
     UserResponseDto updateUserInfo(Long userId, UpdateUserInfoRequestDto updateRequestDto);
 
     UserResponseDto save(UserRegistrationRequestDto registrationRequestDto);
+
+    void delete(Long userId);
 }
