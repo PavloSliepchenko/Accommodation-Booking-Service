@@ -1,7 +1,7 @@
 package com.example.accommodationbookingservice.controller;
 
 import com.example.accommodationbookingservice.dto.user.RoleUpdateRequestDto;
-import com.example.accommodationbookingservice.dto.user.UpdateUserInfoRequestDto;
+import com.example.accommodationbookingservice.dto.user.UserRegistrationRequestDto;
 import com.example.accommodationbookingservice.dto.user.UserResponseDto;
 import com.example.accommodationbookingservice.dto.user.UserWithRoleResponseDto;
 import com.example.accommodationbookingservice.model.User;
@@ -52,7 +52,7 @@ public class UserController {
     @Operation(summary = "Update profile info",
             description = "Allows users to update their profile information")
     public UserResponseDto updateProfileInfo(Authentication authentication,
-                                             @RequestBody UpdateUserInfoRequestDto requestDto) {
+                                             @RequestBody UserRegistrationRequestDto requestDto) {
         User user = getUser(authentication);
         return userService.updateUserInfo(user.getId(), requestDto);
     }

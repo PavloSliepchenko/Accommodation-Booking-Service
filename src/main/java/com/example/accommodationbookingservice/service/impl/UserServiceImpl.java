@@ -1,7 +1,6 @@
 package com.example.accommodationbookingservice.service.impl;
 
 import com.example.accommodationbookingservice.dto.user.RoleUpdateRequestDto;
-import com.example.accommodationbookingservice.dto.user.UpdateUserInfoRequestDto;
 import com.example.accommodationbookingservice.dto.user.UserRegistrationRequestDto;
 import com.example.accommodationbookingservice.dto.user.UserResponseDto;
 import com.example.accommodationbookingservice.dto.user.UserWithRoleResponseDto;
@@ -41,7 +40,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto updateUserInfo(Long userId, UpdateUserInfoRequestDto updateRequestDto) {
+    public UserResponseDto updateUserInfo(Long userId,
+                                          UserRegistrationRequestDto updateRequestDto) {
         User user = getUserById(userId);
         if (updateRequestDto.getFirstName() != null) {
             user.setFirstName(updateRequestDto.getFirstName());
