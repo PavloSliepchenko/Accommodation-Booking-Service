@@ -8,6 +8,7 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 
 @Mapper(config = MapperConfig.class, uses = AddressMapper.class)
 public interface AccommodationMapper {
@@ -20,5 +21,12 @@ public interface AccommodationMapper {
     default void setAccommodationType(@MappingTarget Accommodation accommodation,
                                       CreateAccommodationRequestDto requestDto) {
         accommodation.setType(Accommodation.Type.valueOf(requestDto.getType().toUpperCase()));
+    }
+
+    @Named("GetAccommodationById")
+    default Accommodation getById(Long accommodationId) {
+        Accommodation accommodation = new Accommodation();
+        accommodation.setId(accommodationId);
+        return accommodation;
     }
 }
