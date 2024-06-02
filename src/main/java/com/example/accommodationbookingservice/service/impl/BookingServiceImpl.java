@@ -2,6 +2,7 @@ package com.example.accommodationbookingservice.service.impl;
 
 import com.example.accommodationbookingservice.dto.booking.BookingResponseDto;
 import com.example.accommodationbookingservice.dto.booking.CreateBookingRequestDto;
+import com.example.accommodationbookingservice.exception.CancellationException;
 import com.example.accommodationbookingservice.exception.EntityNotFoundException;
 import com.example.accommodationbookingservice.exception.NoAccommodationException;
 import com.example.accommodationbookingservice.mapper.BookingMapper;
@@ -100,11 +101,14 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingResponseDto cancel(Long userId, Long bookingId) {
         Booking booking = getBookingByUserIdAndBookingId(userId, bookingId);
-        booking.setStatus(Booking.BookingStatus.CANCELED);
-        Accommodation accommodation = booking.getAccommodation();
-        accommodation.setAvailability(accommodation.getAvailability() + 1);
-        accommodationRepository.save(accommodation);
-        return bookingMapper.toDto(bookingRepository.save(booking));
+        if (!booking.getStatus().equals(Booking.BookingStatus.CANCELED)) {
+            booking.setStatus(Booking.BookingStatus.CANCELED);
+            Accommodation accommodation = booking.getAccommodation();
+            accommodation.setAvailability(accommodation.getAvailability() + 1);
+            accommodationRepository.save(accommodation);
+            return bookingMapper.toDto(bookingRepository.save(booking));
+        }
+        throw new CancellationException("This booking was canceled before");
     }
 
     private Booking getBookingByUserIdAndBookingId(Long userId, Long bookingId) {
