@@ -3,7 +3,9 @@ package com.example.accommodationbookingservice.service.impl;
 import com.example.accommodationbookingservice.dto.booking.BookingResponseDto;
 import com.example.accommodationbookingservice.dto.booking.CreateBookingRequestDto;
 import com.example.accommodationbookingservice.exception.EntityNotFoundException;
+import com.example.accommodationbookingservice.exception.NoAccommodationException;
 import com.example.accommodationbookingservice.mapper.BookingMapper;
+import com.example.accommodationbookingservice.model.Accommodation;
 import com.example.accommodationbookingservice.model.Booking;
 import com.example.accommodationbookingservice.repository.AccommodationRepository;
 import com.example.accommodationbookingservice.repository.BookingRepository;
@@ -26,7 +28,19 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingResponseDto save(Long userId, CreateBookingRequestDto requestDto) {
+        Accommodation accommodation =
+                accommodationRepository.findById(requestDto.getAccommodationId())
+                        .orElseThrow(() ->
+                                new EntityNotFoundException("There is no accommodation with id "
+                                        + requestDto.getAccommodationId()));
+        if (accommodation.getAvailability() < 1) {
+            throw new NoAccommodationException("No available accommodation with id "
+                    + requestDto.getAccommodationId() + " left");
+        }
+        accommodation.setAvailability(accommodation.getAvailability() - 1);
+        accommodation = accommodationRepository.save(accommodation);
         Booking booking = bookingMapper.toModel(requestDto);
+        booking.setAccommodation(accommodation);
         booking.setUser(userRepository.findById(userId).get());
         booking.setStatus(Booking.BookingStatus.PENDING);
         return bookingMapper.toDto(bookingRepository.save(booking));
@@ -87,6 +101,9 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponseDto cancel(Long userId, Long bookingId) {
         Booking booking = getBookingByUserIdAndBookingId(userId, bookingId);
         booking.setStatus(Booking.BookingStatus.CANCELED);
+        Accommodation accommodation = booking.getAccommodation();
+        accommodation.setAvailability(accommodation.getAvailability() + 1);
+        accommodationRepository.save(accommodation);
         return bookingMapper.toDto(bookingRepository.save(booking));
     }
 

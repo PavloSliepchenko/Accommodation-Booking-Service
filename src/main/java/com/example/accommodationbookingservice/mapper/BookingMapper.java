@@ -13,9 +13,7 @@ import org.mapstruct.MappingTarget;
 public interface BookingMapper {
     @Mapping(target = "checkIn", source = "checkIn", dateFormat = "dd/MM/yyyy")
     @Mapping(target = "checkOut", source = "checkOut", dateFormat = "dd/MM/yyyy")
-    @Mapping(target = "accommodation",
-            source = "accommodationId",
-            qualifiedByName = "GetAccommodationById")
+    @Mapping(target = "accommodation", ignore = true)
     Booking toModel(CreateBookingRequestDto requestDto);
 
     @Mapping(target = "checkIn", source = "checkIn", dateFormat = "dd/MM/yyyy")
