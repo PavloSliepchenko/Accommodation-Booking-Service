@@ -4,6 +4,7 @@ import com.example.accommodationbookingservice.dto.booking.BookingResponseDto;
 import com.example.accommodationbookingservice.dto.booking.CreateBookingRequestDto;
 import com.example.accommodationbookingservice.model.User;
 import com.example.accommodationbookingservice.service.BookingService;
+import com.example.accommodationbookingservice.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/bookings")
 @Tag(name = "Bookings management", description = "Endpoints for CRUD operations with bookings")
 public class BookingController {
+    private final NotificationService notificationService;
     private final BookingService bookingService;
 
     @PostMapping
@@ -34,7 +36,9 @@ public class BookingController {
     public BookingResponseDto addBooking(Authentication authentication,
                                          @RequestBody @Valid CreateBookingRequestDto requestDto) {
         User user = getUser(authentication);
-        return bookingService.save(user.getId(), requestDto);
+        BookingResponseDto booking = bookingService.save(user.getId(), requestDto);
+        notificationService.sendNotification(booking);
+        return booking;
     }
 
     @GetMapping
@@ -80,7 +84,9 @@ public class BookingController {
     public BookingResponseDto cancelBooking(Authentication authentication,
                                             @PathVariable Long bookingId) {
         User user = getUser(authentication);
-        return bookingService.cancel(user.getId(), bookingId);
+        BookingResponseDto booking = bookingService.cancel(user.getId(), bookingId);
+        notificationService.sendNotification(booking);
+        return booking;
     }
 
     private User getUser(Authentication authentication) {
