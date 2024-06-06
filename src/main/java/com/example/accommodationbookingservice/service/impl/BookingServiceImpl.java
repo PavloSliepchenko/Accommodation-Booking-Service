@@ -12,17 +12,20 @@ import com.example.accommodationbookingservice.repository.AccommodationRepositor
 import com.example.accommodationbookingservice.repository.BookingRepository;
 import com.example.accommodationbookingservice.repository.UserRepository;
 import com.example.accommodationbookingservice.service.BookingService;
+import com.example.accommodationbookingservice.service.NotificationService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
     private final AccommodationRepository accommodationRepository;
+    private final NotificationService notificationService;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final BookingMapper bookingMapper;
@@ -109,6 +112,22 @@ public class BookingServiceImpl implements BookingService {
             return bookingMapper.toDto(bookingRepository.save(booking));
         }
         throw new CancellationException("This booking was canceled before");
+    }
+
+    @Scheduled(cron = "0 0 12 * * ?")
+    public void checkOverdueRentals() {
+        LocalDate today = LocalDate.now();
+        List<Booking> bookings =
+                bookingRepository.findByStatus(Booking.BookingStatus.PENDING).stream()
+                        .filter(e -> e.getCheckOut().getDayOfMonth() - today.getDayOfMonth() == 1)
+                        .toList();
+        if (!bookings.isEmpty()) {
+            bookings.forEach(e -> e.setStatus(Booking.BookingStatus.EXPIRED));
+            bookings = bookingRepository.saveAllAndFlush(bookings);
+        }
+        notificationService.sendNotification(bookings.stream()
+                .map(bookingMapper::toDto)
+                .toList());
     }
 
     private Booking getBookingByUserIdAndBookingId(Long userId, Long bookingId) {
