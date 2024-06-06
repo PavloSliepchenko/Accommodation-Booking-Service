@@ -1,9 +1,9 @@
 package com.example.accommodationbookingservice.service.impl;
 
-import com.example.accommodationbookingservice.dto.accommodation.AccommodationResponseDto;
 import com.example.accommodationbookingservice.dto.booking.BookingResponseDto;
-import com.example.accommodationbookingservice.dto.user.UserResponseDto;
+import com.example.accommodationbookingservice.model.Accommodation;
 import com.example.accommodationbookingservice.model.Booking;
+import com.example.accommodationbookingservice.model.User;
 import com.example.accommodationbookingservice.service.NotificationService;
 import io.github.cdimascio.dotenv.Dotenv;
 import java.util.List;
@@ -35,14 +35,14 @@ public class TelegramNotificationService implements NotificationService {
     }
 
     @Override
-    public void sendNotification(List<BookingResponseDto> dtos) {
-        if (dtos.isEmpty()) {
+    public void sendNotification(List<Booking> bookings) {
+        if (bookings.isEmpty()) {
             sendMessage("No expired bookings today!");
         }
 
-        for (BookingResponseDto responseDto : dtos) {
-            UserResponseDto user = responseDto.getUser();
-            AccommodationResponseDto accommodation = responseDto.getAccommodation();
+        for (Booking booking : bookings) {
+            User user = booking.getUser();
+            Accommodation accommodation = booking.getAccommodation();
             sendMessage(String.format("""
                     Expired booking!
                     Booking id: %s
@@ -53,7 +53,7 @@ public class TelegramNotificationService implements NotificationService {
                     Accommodation type: %s
                     Accommodation location: %s
                     Accommodation availability: %s
-                    """, responseDto.getId(), user.getId(), user.getFirstName(),
+                    """, booking.getId(), user.getId(), user.getFirstName(),
                     accommodation.getId(), accommodation.getType(), accommodation.getLocation(),
                     accommodation.getAvailability()));
         }

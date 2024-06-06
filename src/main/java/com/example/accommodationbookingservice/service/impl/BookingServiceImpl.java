@@ -125,9 +125,7 @@ public class BookingServiceImpl implements BookingService {
             bookings.forEach(e -> e.setStatus(Booking.BookingStatus.EXPIRED));
             bookings = bookingRepository.saveAllAndFlush(bookings);
         }
-        notificationService.sendNotification(bookings.stream()
-                .map(bookingMapper::toDto)
-                .toList());
+        notificationService.sendNotification(bookings);
     }
 
     private Booking getBookingByUserIdAndBookingId(Long userId, Long bookingId) {
