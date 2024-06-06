@@ -1,9 +1,12 @@
 package com.example.accommodationbookingservice.service.impl;
 
+import com.example.accommodationbookingservice.dto.accommodation.AccommodationResponseDto;
 import com.example.accommodationbookingservice.dto.booking.BookingResponseDto;
+import com.example.accommodationbookingservice.dto.user.UserResponseDto;
 import com.example.accommodationbookingservice.model.Booking;
 import com.example.accommodationbookingservice.service.NotificationService;
 import io.github.cdimascio.dotenv.Dotenv;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -29,6 +32,31 @@ public class TelegramNotificationService implements NotificationService {
                 responseDto.getCheckIn(), responseDto.getCheckOut(),
                 responseDto.getAccommodation().getId(),
                 responseDto.getAccommodation().getAvailability(), responseDto.getUser().getId()));
+    }
+
+    @Override
+    public void sendNotification(List<BookingResponseDto> dtos) {
+        if (dtos.isEmpty()) {
+            sendMessage("No expired bookings today!");
+        }
+
+        for (BookingResponseDto responseDto : dtos) {
+            UserResponseDto user = responseDto.getUser();
+            AccommodationResponseDto accommodation = responseDto.getAccommodation();
+            sendMessage(String.format("""
+                    Expired booking!
+                    Booking id: %s
+                    User's id: %s
+                    User's name: %s
+                    Accommodation info:
+                    Accommodation id: %s
+                    Accommodation type: %s
+                    Accommodation location: %s
+                    Accommodation availability: %s
+                    """, responseDto.getId(), user.getId(), user.getFirstName(),
+                    accommodation.getId(), accommodation.getType(), accommodation.getLocation(),
+                    accommodation.getAvailability()));
+        }
     }
 
     private void sendMessage(String message) {
