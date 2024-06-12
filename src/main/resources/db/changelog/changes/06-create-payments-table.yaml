@@ -32,3 +32,9 @@ databaseChangeLog:
               - column:
                   name: amount_to_pay
                   type: DECIMAL(6,2)
+              - column:
+                  name: is_deleted
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false

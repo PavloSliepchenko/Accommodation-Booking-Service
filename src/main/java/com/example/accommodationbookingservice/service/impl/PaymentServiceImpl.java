@@ -1,6 +1,7 @@
 package com.example.accommodationbookingservice.service.impl;
 
 import com.example.accommodationbookingservice.dto.payment.PaymentResponseDto;
+import com.example.accommodationbookingservice.dto.payment.PaymentResponseFullInfoDto;
 import com.example.accommodationbookingservice.exception.EntityNotFoundException;
 import com.example.accommodationbookingservice.exception.PaymentException;
 import com.example.accommodationbookingservice.mapper.PaymentMapper;
@@ -32,9 +33,9 @@ public class PaymentServiceImpl implements PaymentService {
     private static final String SUCCESS = "Success";
     private static final String FINISH_PAYMENT = "You can finish the payment following the link: ";
     private static final String SUCCESS_URL =
-            "http://localhost:8080/payments/success?session_id={CHECKOUT_SESSION_ID}";
+            "http://localhost:8080/api/payments/success?session_id={CHECKOUT_SESSION_ID}";
     private static final String CANCEL_URL =
-            "http://localhost:8080/payments/cancel?session_id={CHECKOUT_SESSION_ID}";
+            "http://localhost:8080/api/payments/cancel?session_id={CHECKOUT_SESSION_ID}";
     private static final String STIPE_SECRET_KEY = Dotenv.load().get("STRIPE_SECRET_KEY");
     private final PaymentRepository paymentRepository;
     private final BookingRepository bookingRepository;
@@ -48,10 +49,11 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public PaymentResponseDto addPayment(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("There is no booking with id " + bookingId));
+    public PaymentResponseDto addPayment(Long bookingId, Long userId) {
+        Booking booking = bookingRepository.findByUserIdAndId(userId, bookingId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("""
+                        User with id %s doesn't have booking with id %s
+                        """, userId, bookingId)));
         Optional<Payment> paymentOptional = paymentRepository.findByBookingId(bookingId);
         if (paymentOptional.isEmpty()) {
             BigDecimal amountToPay =
@@ -93,6 +95,23 @@ public class PaymentServiceImpl implements PaymentService {
             }
         }
         throw new PaymentException(String.format("Booking with id %s was paid before", bookingId));
+    }
+
+    @Override
+    public PaymentResponseFullInfoDto updatePaymentStatus(String sessionId,
+                                                          Payment.PaymentStatus status) {
+        Optional<Payment> paymentOptional = paymentRepository.findBySessionId(sessionId);
+        if (paymentOptional.isPresent()) {
+            Payment payment = paymentOptional.get();
+            payment.setStatus(status);
+            if (status == Payment.PaymentStatus.PAID) {
+                Booking booking = payment.getBooking();
+                booking.setStatus(Booking.BookingStatus.CONFIRMED);
+                bookingRepository.save(booking);
+            }
+            return paymentMapper.toFullInfoDto(paymentRepository.save(payment));
+        }
+        throw new PaymentException("No payments were found with session id " + sessionId);
     }
 
     private Session createSession(BigDecimal amountToPay) {
