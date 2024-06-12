@@ -1,6 +1,7 @@
 package com.example.accommodationbookingservice.service.impl;
 
 import com.example.accommodationbookingservice.dto.booking.BookingResponseDto;
+import com.example.accommodationbookingservice.dto.payment.PaymentResponseFullInfoDto;
 import com.example.accommodationbookingservice.model.Accommodation;
 import com.example.accommodationbookingservice.model.Booking;
 import com.example.accommodationbookingservice.model.User;
@@ -57,6 +58,20 @@ public class TelegramNotificationService implements NotificationService {
                     accommodation.getId(), accommodation.getType(), accommodation.getLocation(),
                     accommodation.getAvailability()));
         }
+    }
+
+    @Override
+    public void sendNotification(PaymentResponseFullInfoDto responseDto) {
+        String message = String.format("""
+                        New payment!
+                        User id: %s
+                        Booking id: %s
+                        Accommodation id: %s
+                        Amount: $%s
+                        """, responseDto.getUserId(), responseDto.getBooking().getId(),
+                responseDto.getBooking().getAccommodation().getId(),
+                responseDto.getAmount());
+        sendMessage(message);
     }
 
     private void sendMessage(String message) {

@@ -39,6 +39,8 @@ public class Payment {
     private URL sessionUrl;
     private String sessionId;
     private BigDecimal amountToPay;
+    @Column(nullable = false)
+    private boolean isDeleted = false;
 
     public enum PaymentStatus {
         PENDING,
