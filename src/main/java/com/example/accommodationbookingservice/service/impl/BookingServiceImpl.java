@@ -115,7 +115,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Scheduled(cron = "0 0 12 * * ?")
-    public void checkOverdueRentals() {
+    public void checkExpiredBookings() {
         LocalDate today = LocalDate.now();
         List<Booking> bookings =
                 bookingRepository.findByStatus(Booking.BookingStatus.PENDING).stream()
